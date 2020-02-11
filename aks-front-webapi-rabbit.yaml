@@ -1,0 +1,114 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: rabbit-mq-service
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: rabbit-mq-service
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: rabbit-mq-service
+        image: ashwilliams/rabbitmq:management
+        ports:
+        - containerPort: 5672
+          name: redis
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbit-mq-service
+spec:
+  ports:
+  - port: 5672
+  selector:
+    app: rabbit-mq-service
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: rabbit-mq-api
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5 
+  template:
+    metadata:
+      labels:
+        app: rabbit-mq-api
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: rabbit-mq-api
+        image: ashwilliams/api-mq:latest
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 250m
+          limits:
+            cpu: 500m
+        env:
+        - name: RABBIT
+          value: "rabbit-mq-service"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbit-mq-api
+spec:
+  ports:
+  - port: 80
+  selector:
+    app: rabbit-mq-api
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: rabbit-mq-front
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5 
+  template:
+    metadata:
+      labels:
+        app: rabbit-mq-front
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: rabbit-mq-front
+        image: ashwilliams/front-mq:latest
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 250m
+          limits:
+            cpu: 500m
+        env:
+        - name: RabbitApi
+          value: "rabbit-mq-api"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbit-mq-front
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+  selector:
+    app: rabbit-mq-front

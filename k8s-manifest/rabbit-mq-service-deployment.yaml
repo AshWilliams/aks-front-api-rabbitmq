@@ -1,0 +1,19 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: rabbit-mq-service
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: rabbit-mq-service
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: rabbit-mq-service
+        image: ashwilliams/rabbitmq:management
+        ports:
+        - containerPort: 5672
+          name: rabbit-amqp

@@ -25,3 +25,4 @@ steps:
     arguments: '-f  k8s-manifest/aks-front-webapi-rabbit-all-in-one.yaml'
     secretType: 'dockerRegistry'
     containerRegistryType: 'Azure Container Registry'
+  displayName: 'Deploy to AKS Cluster'

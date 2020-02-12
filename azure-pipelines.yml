@@ -1,0 +1,28 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: KubectlInstaller@0
+  inputs:
+    kubectlVersion: 'latest'
+  displayName: 'Installing kubectl latest'
+
+- task: Kubernetes@1
+  inputs:
+    connectionType: 'Azure Resource Manager'
+    azureSubscriptionEndpoint: 'InternalOSSAzure(658a53e3-ea72-4675-b77a-0380f3b476e6)'
+    azureResourceGroup: 'RG-AKS-BlueTeam'
+    kubernetesCluster: 'aks-demo-cluster'
+    command: 'apply'
+    arguments: '-f  k8s-manifest/aks-front-webapi-rabbit-all-in-one.yaml'
+    secretType: 'dockerRegistry'
+    containerRegistryType: 'Azure Container Registry'
+  displayName: 'Deploy to AKS Cluster'

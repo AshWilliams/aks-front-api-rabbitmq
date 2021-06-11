@@ -1,9 +1,12 @@
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: rabbit-mq-service
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: rabbit-mq-service
   template:
     metadata:
       labels:
@@ -28,12 +31,15 @@ spec:
   selector:
     app: rabbit-mq-service
 ---
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: rabbit-mq-api
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: rabbit-mq-api
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -70,16 +76,19 @@ spec:
   selector:
     app: rabbit-mq-api
 ---
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: rabbit-mq-front
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: rabbit-mq-front
   strategy:
     rollingUpdate:
       maxSurge: 1
-      maxUnavailable: 1
+      maxUnavailable: 0
   minReadySeconds: 5 
   template:
     metadata:
@@ -107,7 +116,7 @@ kind: Service
 metadata:
   name: rabbit-mq-front
 spec:
-  type: LoadBalancer
+  #type: LoadBalancer
   ports:
   - port: 80
   selector:
